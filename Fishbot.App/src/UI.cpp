@@ -52,7 +52,7 @@ static bool CreateDeviceD3D(HWND hWnd) {
 bool UI::Init() {
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"NotepadUI", nullptr };
     RegisterClassExW(&wc);
-    g_hwnd = CreateWindowW(wc.lpszClassName, L"Notepad", WS_OVERLAPPEDWINDOW, 100, 100, 500, 600, nullptr, nullptr, wc.hInstance, nullptr);
+    g_hwnd = CreateWindowW(wc.lpszClassName, L"Notepad", WS_OVERLAPPEDWINDOW, 100, 100, 550, 600, nullptr, nullptr, wc.hInstance, nullptr);
 
     if (!CreateDeviceD3D(g_hwnd)) {
         CleanupRenderTarget();
@@ -203,6 +203,7 @@ bool UI::Render(BotConfig& config, bool& isRunning, bool& isPaused) {
         ImGui::OpenPopup("Setup Guide");
     }
 
+    ImGui::SetNextWindowSize(ImVec2(520, 0), ImGuiCond_Appearing);
     if (ImGui::BeginPopupModal("Setup Guide", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
         ImGui::Text("1. In WoW, go to Options > Gameplay > Controls.");
         ImGui::Text("2. Check 'Enable Interact Key'.");
@@ -210,6 +211,9 @@ bool UI::Render(BotConfig& config, bool& isRunning, bool& isPaused) {
         ImGui::Text("4. Set the SAME Interact key in Fishbot.");
         ImGui::Text("5. Place your Fishing skill on an action bar (e.g., '1').");
         ImGui::Text("6. Set the SAME Cast key in Fishbot.");
+        ImGui::Spacing();
+        ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), "REQUIRED FOR ANTI-AFK:");
+        ImGui::Text("You must have strafe left bound to 'A' and strafe right bound to 'D'.");
         ImGui::Spacing();
         ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), "IMPORTANT:");
         ImGui::Text("7. Stand near water, click Start in Fishbot.");

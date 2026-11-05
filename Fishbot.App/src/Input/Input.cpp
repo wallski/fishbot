@@ -33,12 +33,12 @@ void Input::MoveSlightly() {
     inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
 
     SendInput(1, &inputs[0], sizeof(INPUT));
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
     SendInput(1, &inputs[1], sizeof(INPUT));
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     SendInput(1, &inputs[2], sizeof(INPUT));
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
     SendInput(1, &inputs[3], sizeof(INPUT));
 }

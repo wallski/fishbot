@@ -66,8 +66,6 @@ int main() {
     bool quitPressed = false;
     bool pausePressed = false;
 
-    int castsSinceMove = 0;
-
     float audioThreshold = 0.10f;
 
     while (true) {
@@ -144,15 +142,9 @@ int main() {
             break;
 
         case BotState::REELING:
-            if (elapsed > 2000) {
-                if (castsSinceMove >= 3) {
-                    Input::MoveSlightly();
-                    castsSinceMove = 0;
-                }
-                else {
-                    castsSinceMove++;
-                }
-
+            if (elapsed > 800) {
+                Input::MoveSlightly();
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
                 state = BotState::CASTING;
             }
             break;
