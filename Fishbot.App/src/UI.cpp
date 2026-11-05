@@ -52,7 +52,7 @@ static bool CreateDeviceD3D(HWND hWnd) {
 bool UI::Init() {
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"NotepadUI", nullptr };
     RegisterClassExW(&wc);
-    g_hwnd = CreateWindowW(wc.lpszClassName, L"Notepad", WS_OVERLAPPEDWINDOW, 100, 100, 550, 600, nullptr, nullptr, wc.hInstance, nullptr);
+    g_hwnd = CreateWindowW(wc.lpszClassName, L"Notepad", WS_OVERLAPPEDWINDOW, 100, 100, 550, 700, nullptr, nullptr, wc.hInstance, nullptr);
 
     if (!CreateDeviceD3D(g_hwnd)) {
         CleanupRenderTarget();
@@ -92,7 +92,7 @@ void UI::Shutdown() {
     DestroyWindow(g_hwnd);
 }
 
-bool UI::Render(BotConfig& config, bool& isRunning, bool& isPaused) {
+bool UI::Render(BotConfig& config, bool& isRunning, float currentRMS) {
     MSG msg;
     while (PeekMessage(&msg, nullptr, 0U, 0U, PM_REMOVE)) {
         TranslateMessage(&msg);
@@ -114,10 +114,7 @@ bool UI::Render(BotConfig& config, bool& isRunning, bool& isPaused) {
     ImGui::Separator();
     ImGui::Spacing();
 
-    if (isPaused) {
-        ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.0f, 1.0f), "STATUS: PAUSED");
-    }
-    else if (isRunning) {
+    if (isRunning) {
         ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "STATUS: RUNNING");
     }
     else {
@@ -132,7 +129,6 @@ bool UI::Render(BotConfig& config, bool& isRunning, bool& isPaused) {
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.9f, 0.3f, 0.3f, 1.0f));
         if (ImGui::Button("Stop", ImVec2(120, 35))) {
             isRunning = false;
-            isPaused = false;
         }
         ImGui::PopStyleColor(3);
     }
@@ -142,7 +138,6 @@ bool UI::Render(BotConfig& config, bool& isRunning, bool& isPaused) {
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.8f, 0.3f, 1.0f));
         if (ImGui::Button("Start", ImVec2(120, 35))) {
             isRunning = true;
-            isPaused = false;
         }
         ImGui::PopStyleColor(3);
     }
@@ -190,10 +185,43 @@ bool UI::Render(BotConfig& config, bool& isRunning, bool& isPaused) {
 
     BindKey("Cast Key", config.castKey, config);
     BindKey("Interact Key", config.interactKey, config);
-    BindKey("Pause Key", config.pauseKey, config);
+    BindKey("Start/Stop Key", config.pauseKey, config);
     BindKey("Quit Key", config.quitKey, config);
 
     ImGui::Columns(1);
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+
+    ImGui::TextColored(ImVec4(0.8f, 0.8f, 0.8f, 1.0f), "AUDIO SETTINGS");
+    ImGui::Spacing();
+
+    if (ImGui::SliderFloat("Sound Threshold", &config.audioThreshold, 0.01f, 0.50f, "%.2f")) {
+        ConfigManager::Save(config);
+    }
+
+    ImGui::Spacing();
+    ImVec2 p = ImGui::GetCursorScreenPos();
+    float barWidth = ImGui::GetContentRegionAvail().x;
+    float barHeight = 20.0f;
+    ImGui::InvisibleButton("audio_meter", ImVec2(barWidth, barHeight));
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    draw_list->AddRectFilled(p, ImVec2(p.x + barWidth, p.y + barHeight), IM_COL32(40, 40, 40, 255), 4.0f);
+
+    float maxVisualizedRMS = 0.50f;
+    float fillWidth = (currentRMS / maxVisualizedRMS) * barWidth;
+    if (fillWidth > barWidth) fillWidth = barWidth;
+
+    ImU32 fillColor = (currentRMS > config.audioThreshold) ? IM_COL32(255, 100, 100, 255) : IM_COL32(100, 255, 100, 255);
+    if (fillWidth > 0) {
+        draw_list->AddRectFilled(p, ImVec2(p.x + fillWidth, p.y + barHeight), fillColor, 4.0f);
+    }
+
+    float threshX = (config.audioThreshold / maxVisualizedRMS) * barWidth;
+    if (threshX > barWidth) threshX = barWidth;
+    draw_list->AddLine(ImVec2(p.x + threshX, p.y - 2), ImVec2(p.x + threshX, p.y + barHeight + 2), IM_COL32(255, 255, 255, 255), 2.0f);
 
     ImGui::Spacing();
     ImGui::Separator();

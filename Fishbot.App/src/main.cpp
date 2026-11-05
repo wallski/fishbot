@@ -61,12 +61,9 @@ int main() {
     cv::Point lastGearLoc(-1, -1);
 
     bool isRunning = false;
-    bool isPaused = false;
 
     bool quitPressed = false;
-    bool pausePressed = false;
-
-    float audioThreshold = 0.10f;
+    bool togglePressed = false;
 
     while (true) {
         if (GetAsyncKeyState(config.quitKey) & 0x8000) {
@@ -80,20 +77,22 @@ int main() {
         }
 
         if (GetAsyncKeyState(config.pauseKey) & 0x8000) {
-            if (!pausePressed) {
-                isPaused = !isPaused;
-                pausePressed = true;
+            if (!togglePressed) {
+                isRunning = !isRunning;
+                togglePressed = true;
             }
         }
         else {
-            pausePressed = false;
+            togglePressed = false;
         }
 
-        if (!UI::Render(config, isRunning, isPaused)) {
+        float currentRMS = audio.GetCurrentRMS();
+
+        if (!UI::Render(config, isRunning, currentRMS)) {
             break;
         }
 
-        if (!isRunning || isPaused) {
+        if (!isRunning) {
             std::this_thread::sleep_for(std::chrono::milliseconds(50));
             continue;
         }
@@ -111,7 +110,6 @@ int main() {
         bool gearFound = matcher.FindGear(frame, searchRegion, gearLoc);
         if (gearFound) lastGearLoc = gearLoc;
 
-        float currentRMS = audio.GetCurrentRMS();
         auto now = std::chrono::steady_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - stateTimer).count();
 
@@ -134,7 +132,7 @@ int main() {
             break;
 
         case BotState::MONITORING:
-            if (elapsed > 2000 && currentRMS > audioThreshold) {
+            if (elapsed > 2000 && currentRMS > config.audioThreshold) {
                 Input::PressKey(config.interactKey);
                 state = BotState::REELING;
                 stateTimer = now;

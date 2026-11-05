@@ -21,12 +21,13 @@ void ConfigManager::Load(BotConfig& config) {
     while (std::getline(file, line)) {
         std::istringstream iss(line);
         std::string key;
-        int value;
+        float value;
         if (iss >> key >> value) {
-            if (key == "castKey") config.castKey = value;
-            else if (key == "interactKey") config.interactKey = value;
-            else if (key == "pauseKey") config.pauseKey = value;
-            else if (key == "quitKey") config.quitKey = value;
+            if (key == "castKey") config.castKey = (int)value;
+            else if (key == "interactKey") config.interactKey = (int)value;
+            else if (key == "pauseKey") config.pauseKey = (int)value;
+            else if (key == "quitKey") config.quitKey = (int)value;
+            else if (key == "audioThreshold") config.audioThreshold = value;
         }
     }
 }
@@ -39,4 +40,5 @@ void ConfigManager::Save(const BotConfig& config) {
     file << "interactKey " << config.interactKey << "\n";
     file << "pauseKey " << config.pauseKey << "\n";
     file << "quitKey " << config.quitKey << "\n";
+    file << "audioThreshold " << config.audioThreshold << "\n";
 }

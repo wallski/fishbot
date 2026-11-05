@@ -7,6 +7,7 @@ struct BotConfig {
     int interactKey = VK_OEM_4;
     int pauseKey = VK_F8;
     int quitKey = VK_OEM_PLUS;
+    float audioThreshold = 0.05f;
 };
 
 class ConfigManager {
