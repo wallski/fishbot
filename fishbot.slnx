@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Fishbot.App/Fishbot.App.vcxproj" Id="2e790c1b-aaf9-45f1-92bc-6728ae1072e3" />
+</Solution>
